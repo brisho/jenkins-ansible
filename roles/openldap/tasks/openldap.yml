@@ -50,11 +50,11 @@
 
 - name: Enable memberOf overlay
   shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.memberof.ldif
-      creates='{{ slapd_dir }}/slapd.d/cn=config/olcDatabase={2}hdb/olcOverlay={0}memberof.ldif'
+      creates='{{ slapd_dir }}/slapd.d/cn=config/olcDatabase={2}{{ slapd_backend }}/olcOverlay={0}memberof.ldif'
 
 - name: Enable referential integrity overlay
   shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.refint.ldif
-      creates='{{ slapd_dir }}/slapd.d/cn=config/olcDatabase={2}hdb/olcOverlay={1}refint.ldif'
+      creates='{{ slapd_dir }}/slapd.d/cn=config/olcDatabase={2}{{ slapd_backend }}/olcOverlay={1}refint.ldif'
 
 - name: Test if remote access is already configured
   command: '/usr/bin/grep "olcRootDN: cn=admin,cn=config" {{ slapd_dir }}/slapd.d/cn=config/*ldif'
