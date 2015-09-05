@@ -1,0 +1,14 @@
+dn: cn=module,cn=config
+cn: module
+objectClass: olcModuleList
+objectClass: top
+olcModulePath: /usr/lib64/openldap/
+olcModuleLoad: refint.la
+
+dn: olcOverlay=refint,olcDatabase={2}hdb,cn=config
+objectClass: olcConfig
+objectClass: olcOverlayConfig
+objectClass: olcRefintConfig
+objectClass: top
+olcOverlay: refint
+olcRefintAttribute: memberof member manager owner

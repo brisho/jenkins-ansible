@@ -1,0 +1,67 @@
+---
+
+- name: Install OpenLDAP packages
+  yum: pkg={{ item }} state=latest
+  with_items:
+      - openldap-clients
+      - openldap-servers
+
+- name: Check if LDAPS is enabled
+  command: '/usr/bin/grep SLAPD_URLS /etc/sysconfig/slapd'
+  register: ldaps_enabled
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
+- name: Enable LDAPS
+  lineinfile: dest=/etc/sysconfig/slapd
+      regexp='^SLAPD_URLS=.*'
+      line='SLAPD_URLS="ldapi:/// ldaps:/// ldap:///"'
+  notify: Restart slapd
+  when: '"ldaps:///" not in ldaps_enabled.stdout'
+
+- name: Ensure OpenLDAP server is running
+  service: name=slapd
+      enabled=yes
+      state=started
+
+- name: Install core schema
+  shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/core.ldif
+      creates='{{ slapd_dir }}/slapd.d/cn=config/cn=schema/cn={0}core.ldif'
+
+- name: Install cosine schema
+  shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/cosine.ldif
+      creates='{{ slapd_dir }}/slapd.d/cn=config/cn=schema/cn={1}cosine.ldif'
+
+- name: Install inetorgperson schema
+  shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/inetorgperson.ldif
+      creates='{{ slapd_dir }}/slapd.d/cn=config/cn=schema/cn={2}inetorgperson.ldif'
+
+- name: Copy LDIF for memberOf overlay
+  copy: src=backend.memberof.ldif
+      dest='{{ slapd_dir }}/backend.memberof.ldif'
+
+- name: Copy LDIF for referential integrity overlay
+  copy: src=backend.refint.ldif
+      dest='{{ slapd_dir }}/backend.refint.ldif'
+
+- name: Copy LDIF for remote access
+  copy: src=backend.remote_access.ldif
+      dest='{{ slapd_dir }}/backend.remote_access.ldif'
+
+- name: Enable memberOf overlay
+  shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.memberof.ldif
+      creates='{{ slapd_dir }}/slapd.d/cn=config/olcDatabase={2}hdb/olcOverlay={0}memberof.ldif'
+
+- name: Enable referential integrity overlay
+  shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.refint.ldif
+      creates='{{ slapd_dir }}/slapd.d/cn=config/olcDatabase={2}hdb/olcOverlay={1}refint.ldif'
+
+- name: Test if remote access is already configured
+  command: '/usr/bin/grep "olcRootDN: cn=admin,cn=config" {{ slapd_dir }}/slapd.d/cn=config/*ldif'
+  register: remote_access_enabled
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
+- name: Enable remote access
+  shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.remote_access.ldif
+  when: '"olcRootDN:" not in remote_access_enabled.stdout'

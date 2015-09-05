@@ -1,0 +1,11 @@
+---
+
+- hosts: default
+
+  gather_facts: True
+
+  vars_files:
+    - settings.yml
+
+  roles:
+    - { role: openldap, tags: ['openldap'] }

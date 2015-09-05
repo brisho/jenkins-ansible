@@ -1,0 +1,18 @@
+#dn: olcDatabase={-1}frontend,cn=config
+#changetype: modify
+#delete: olcAccess
+#
+dn: olcDatabase={0}config,cn=config
+changetype: modify
+add: olcRootDN
+olcRootDN: cn=admin,cn=config
+
+dn: olcDatabase={0}config,cn=config
+changetype: modify
+add: olcRootPW
+# Password is set to "admin" - use slappasswd to generate a new one if desired
+olcRootPW: {SSHA}cmaKopt8ZxsY1YvGrhhp8DyEs2itmN3w
+
+dn: olcDatabase={0}config,cn=config
+changetype: modify
+delete: olcAccess
