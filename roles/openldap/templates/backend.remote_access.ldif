@@ -10,8 +10,7 @@ olcRootDN: cn=admin,cn=config
 dn: olcDatabase={0}config,cn=config
 changetype: modify
 add: olcRootPW
-# Password is set to "admin" - use slappasswd to generate a new one if desired
-olcRootPW: {SSHA}cmaKopt8ZxsY1YvGrhhp8DyEs2itmN3w
+olcRootPW: {{ slapd_admin_password }}
 
 dn: olcDatabase={0}config,cn=config
 changetype: modify

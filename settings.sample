@@ -6,5 +6,5 @@ slapd_dir: '/etc/openldap'
 slapd_domain: '{{ ansible_domain }}'
 slapd_basedn: '{{ "dc=" + slapd_domain.split(".") | join(",dc=") }}'
 slapd_backend: 'hdb'
-slapd_admin_password: 't0pSekrit!'
-
+# Set password to "admin" (use slappasswd to change it if desired)
+slapd_admin_password: '{SSHA}cmaKopt8ZxsY1YvGrhhp8DyEs2itmN3w'
