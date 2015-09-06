@@ -25,15 +25,15 @@
       state=started
 
 - name: Install core schema
-  shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/core.ldif
+  command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/core.ldif
       creates='{{ slapd_dir }}/slapd.d/cn=config/cn=schema/cn={0}core.ldif'
 
 - name: Install cosine schema
-  shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/cosine.ldif
+  command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/cosine.ldif
       creates='{{ slapd_dir }}/slapd.d/cn=config/cn=schema/cn={1}cosine.ldif'
 
 - name: Install inetorgperson schema
-  shell: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/inetorgperson.ldif
+  command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/inetorgperson.ldif
       creates='{{ slapd_dir }}/slapd.d/cn=config/cn=schema/cn={2}inetorgperson.ldif'
 
 - name: Copy LDIF for memberOf overlay
