@@ -1,0 +1,30 @@
+# Create directory database
+dn: olcDatabase={{ slapd_backend }},cn=config
+objectClass: olcDatabaseConfig
+objectClass: olc{{ slapd_backend }}Config
+olcDatabase: {{ slapd_backend }}
+# Create domain name
+olcSuffix: {{ slapd_basedn }}
+# Location of database
+olcDbDirectory: /var/lib/ldap
+# Manager of the database
+olcRootDN: cn=admin,{{ slapd_basedn }}
+olcRootPW: {{ ldap_passwd.stdout }}
+# Set up database indices
+olcDbIndex: uid pres,eq
+olcDbIndex: cn,sn,mail pres,eq,approx,sub
+olcDbIndex: objectClass eq
+# Allow users to change their own password
+# Allow anonymous to auth against the password
+# Allow admin to change anyone's password
+olcAccess: to attrs=userPassword
+  by self write
+  by dn="cn=admin,{{ slapd_basedn }}" write
+  by anonymous auth
+  by * none
+olcAccess: to dn.base=""
+  by * read
+olcAccess: to *
+  by self write
+  by dn="cn=admin,{{ slapd_basedn }}" write
+  by * read

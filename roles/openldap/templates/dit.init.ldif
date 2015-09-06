@@ -1,0 +1,15 @@
+dn: {{ slapd_basedn }}
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: {{ slapd_domain }}
+dc: {{ slapd_domain.split('.')[0] }}
+
+dn: ou=users,{{ slapd_basedn }}
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,{{ slapd_basedn }}
+objectClass: organizationalUnit
+ou: groups
+
