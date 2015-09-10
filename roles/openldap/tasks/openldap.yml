@@ -19,6 +19,12 @@
   notify: Restart slapd
   when: '"ldaps:///" not in ldaps_enabled.stdout'
 
+- name: Generate admin password hash
+  shell: 'echo -n "{{ slapd_admin_password }}" | /usr/sbin/slappasswd -h "{SSHA}" -T /dev/fd/0'
+  register: ldap_passwd
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
 - name: Ensure OpenLDAP server is running
   service: name=slapd
       enabled=yes
@@ -57,13 +63,6 @@
   register: remote_access_enabled
   failed_when: 1 == 0
   changed_when: 1 == 0
-
-- name: Generate admin password hash
-  shell: 'echo -n "{{ slapd_admin_password }}" | /usr/sbin/slappasswd -h "{SSHA}" -T /dev/fd/0'
-  register: ldap_passwd
-  failed_when: 1 == 0
-  changed_when: 1 == 0
-  when: '"olcRootDN:" not in remote_access_enabled.stdout'
 
 - name: Copy LDIF for remote access
   template: src=backend.remote_access.ldif
