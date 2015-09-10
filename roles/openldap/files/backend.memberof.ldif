@@ -5,7 +5,7 @@ objectClass: top
 olcModulePath: /usr/lib64/openldap/
 olcModuleLoad: memberof.la
 
-dn: olcOverlay={0}memberof,olcDatabase={2}hdb,cn=config
+dn: olcOverlay=memberof,olcDatabase={2}hdb,cn=config
 objectClass: olcConfig
 objectClass: olcMemberOf
 objectClass: olcOverlayConfig
