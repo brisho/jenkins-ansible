@@ -170,3 +170,18 @@
 - name: Add new users
   shell: /usr/bin/ldapadd -x -H ldapi:/// -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} -f {{ slapd_dir }}/new_users.ldif
   when: '"uid: " not in ldapuser_present.stdout'
+
+- name: Check if everyone group is present
+  shell: '/usr/bin/ldapsearch -xLLL -H ldapi:/// -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} -b {{ slapd_basedn }} "(cn=Everyone)" | /usr/bin/grep "cn: Everyone"'
+  register: ldapgroup_present
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
+- name: Copy new groups LDIF
+  copy: src=new_groups.ldif
+      dest='{{ slapd_dir }}/new_groups.ldif'
+  when: '"Everyone" not in ldapgroup_present.stdout'
+
+- name: Add new groups
+  shell: /usr/bin/ldapadd -x -H ldapi:/// -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} -f {{ slapd_dir }}/new_groups.ldif
+  when: '"Everyone" not in ldapgroup_present.stdout'

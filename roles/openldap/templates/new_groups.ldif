@@ -1,0 +1,7 @@
+dn: cn=Everyone,ou=groups,{{ slapd_basedn }}
+cn: Everyone
+objectClass: groupOfNames
+objectClass: top
+objectClass: mailboxRelatedObject
+member: uid=ldapuser,ou=users,{{ slapd_basedn }}
+mail: everyone@{{ slapd_domain }}
