@@ -19,16 +19,16 @@
   notify: Restart slapd
   when: '"ldaps:///" not in ldaps_enabled.stdout'
 
+- name: Ensure OpenLDAP server is running
+  service: name=slapd
+      enabled=yes
+      state=started
+
 - name: Generate admin password hash
   shell: 'echo -n "{{ slapd_admin_password }}" | /usr/sbin/slappasswd -h "{SSHA}" -T /dev/fd/0'
   register: ldap_passwd
   failed_when: 1 == 0
   changed_when: 1 == 0
-
-- name: Ensure OpenLDAP server is running
-  service: name=slapd
-      enabled=yes
-      state=started
 
 - name: Install core schema
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/core.ldif
