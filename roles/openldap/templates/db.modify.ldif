@@ -7,7 +7,7 @@ replace: olcRootDN
 olcRootDN: cn=admin,{{ slapd_basedn }}
 -
 add: olcRootPW
-olcRootPW: {{ ldap_passwd }}
+olcRootPW: {{ ldap_passwd.stdout }}
 -
 add: olcDbIndex
 olcDbIndex: uid pres,eq
