@@ -137,14 +137,17 @@
   when: '"local" not in ldap_local_schema.stdout'
   notify: Restart slapd
 
+- name: Check if LDAP DIT is initialized
+  shell: '/usr/bin/ldapsearch -xLLL -H ldapi:/// -b {{ slapd_basedn }} -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} "(objectClass=dcObject)" | /usr/bin/grep "dn: {{ slapd_basedn }}"'
+  register: ldap_dit_initialized
   failed_when: 1 == 0
   changed_when: 1 == 0
 
 - name: Copy LDIF for DIT initialization
   template: src=dit.init.ldif
       dest='{{ slapd_dir }}/dit.init.ldif'
-  when: '"{{ slapd_basedn }}" not in ldap_db_initialized.stdout'
+  when: '"{{ slapd_basedn }}" not in ldap_dit_initialized.stdout'
 
 - name: Initialize the DIT
-  shell: /usr/bin/ldapadd -x -H ldapi:/// -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} -f {{ slapd_dir }}/dit.init.ldif
-  when: '"{{ slapd_basedn }}" not in ldap_db_initialized.stdout'
+  command: /usr/bin/ldapadd -x -H ldapi:/// -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} -f {{ slapd_dir }}/dit.init.ldif
+  when: '"{{ slapd_basedn }}" not in ldap_dit_initialized.stdout'

@@ -6,10 +6,12 @@ o: {{ slapd_domain }}
 dc: {{ slapd_domain.split('.')[0] }}
 
 dn: ou=users,{{ slapd_basedn }}
+objectClass: top
 objectClass: organizationalUnit
 ou: users
 
 dn: ou=groups,{{ slapd_basedn }}
+objectClass: top
 objectClass: organizationalUnit
 ou: groups
 
