@@ -1,0 +1,12 @@
+dn: uid=ldapuser,ou=users,{{ slapd_basedn }}
+uid: ldapuser
+sn: User
+cn: LDAP User
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+displayName: LDAP User
+givenName: LDAP
+# Password is TopSekrit!
+userPassword: {SSHA}YZYvNgA1F/ShTiQMOmRdf0g3rPHOYdgd

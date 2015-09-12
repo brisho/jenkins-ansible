@@ -151,3 +151,22 @@
 - name: Initialize the DIT
   command: /usr/bin/ldapadd -x -H ldapi:/// -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} -f {{ slapd_dir }}/dit.init.ldif
   when: '"{{ slapd_basedn }}" not in ldap_dit_initialized.stdout'
+
+- name: Check if ldapuser is present
+  shell: '/usr/bin/ldapsearch -xLLL -H ldapi:/// -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} -b {{ slapd_basedn }} "(uid=ldapuser)" | /usr/bin/grep "uid: "'
+  register: ldapuser_present
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
+- name: Force slapd restart
+  command: /usr/bin/systemctl restart slapd
+  when: '"uid: " not in ldapuser_present.stdout'
+
+- name: Copy new users LDIF
+  copy: src=new_users.ldif
+      dest='{{ slapd_dir }}/new_users.ldif'
+  when: '"uid: " not in ldapuser_present.stdout'
+
+- name: Add new users
+  shell: /usr/bin/ldapadd -x -H ldapi:/// -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} -f {{ slapd_dir }}/new_users.ldif
+  when: '"uid: " not in ldapuser_present.stdout'
