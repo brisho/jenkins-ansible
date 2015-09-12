@@ -1,0 +1,16 @@
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: {{ slapd_basedn }}
+-
+changetype: modify
+replace: olcRootDN
+olcRootDN: cn=admin,{{ slapd_basedn }}
+-
+changetype: modify
+add: olcRootPW
+olcRootPW: {{ ldap_passwd }}
+-
+changetype: modify
+add: olcDbIndex
+olcDbIndex: uid pres,eq

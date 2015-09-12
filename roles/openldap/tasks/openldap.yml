@@ -37,6 +37,15 @@
   changed_when: 1 == 0
   when: '"olcRootPW:" not in ldap_admin_password_set.stdout'
 
+- name: Copy LDIF for initializing LDAP database
+  template: src=db.modify.ldif
+      dest='{{ slapd_dir }}/db.modify.ldif'
+  when: '"olcRootPW:" not in ldap_admin_password_set.stdout'
+
+- name: Initialize LDAP database
+  command: /usr/bin/ldapmodify -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/db.modify.ldif
+  when: '"olcRootPW:" not in ldap_admin_password_set.stdout'
+
 - name: Check if core schema is installed
   shell: /usr/sbin/slapcat -n0 | /usr/bin/grep "core,cn=schema,cn=config"
   register: ldap_core_schema
@@ -112,20 +121,8 @@
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.remote_access.ldif
   when: '"olcRootDN:" not in ldap_remote_access.stdout'
 
-- name: Check if LDAP database is initialized
-  shell: '/usr/bin/grep {{ slapd_basedn }} {{ slapd_dir }}/slapd.d/cn=config/olcDatabase={*}{{ slapd_backend }}.ldif'
-  register: ldap_db_initialized
   failed_when: 1 == 0
   changed_when: 1 == 0
-
-- name: Copy LDIF for LDAP database initialization
-  template: src=db.init.ldif
-      dest='{{ slapd_dir }}/db.init.ldif'
-  when: '"{{ slapd_basedn }}" not in ldap_db_initialized.stdout'
-
-- name: Initialize the LDAP database
-  shell: /usr/bin/ldapadd -x -H ldapi:/// -D cn=admin,cn=config -w {{ slapd_admin_password }} -f {{ slapd_dir }}/db.init.ldif
-  when: '"{{ slapd_basedn }}" not in ldap_db_initialized.stdout'
 
 - name: Copy LDIF for DIT initialization
   template: src=dit.init.ldif
