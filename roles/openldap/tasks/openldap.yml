@@ -37,9 +37,15 @@
   changed_when: 1 == 0
   when: '"olcRootPW:" not in ldap_admin_password_set.stdout'
 
+- name: Check if core schema is installed
+  shell: /usr/sbin/slapcat -n0 | /usr/bin/grep "core,cn=schema,cn=config"
+  register: ldap_core_schema
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
 - name: Install core schema
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/core.ldif
-      creates='{{ slapd_dir }}/slapd.d/cn=config/cn=schema/cn={0}core.ldif'
+  when: '"core" not in ldap_core_schema.stdout'
 
 - name: Install cosine schema
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/cosine.ldif
