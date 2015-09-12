@@ -121,6 +121,22 @@
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.remote_access.ldif
   when: '"olcRootDN:" not in ldap_remote_access.stdout'
 
+- name: Check if local schema changes have been loaded
+  shell: /usr/sbin/slapcat -n0 | /usr/bin/grep "local,cn=schema,cn=config"
+  register: ldap_local_schema
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
+- name: Copy local schema changes
+  copy: src=schema.local.ldif
+      dest={{ slapd_dir }}/schema.local.ldif
+  when: '"local" not in ldap_local_schema.stdout'
+
+- name: Activate local schema changes
+  command: '/usr/bin/ldapadd -H ldapi:/// -D cn=admin,cn=config -w {{ slapd_admin_password }} -f {{ slapd_dir }}/schema.local.ldif'
+  when: '"local" not in ldap_local_schema.stdout'
+  notify: Restart slapd
+
   failed_when: 1 == 0
   changed_when: 1 == 0
 
