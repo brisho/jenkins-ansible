@@ -82,13 +82,20 @@
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.memberof.ldif
   when: '"olcModuleLoad:" not in ldap_memberof_overlay.stdout'
 
+- name: Check if referential integrity overlay is installed
+  shell: /usr/sbin/slapcat -n0 | /usr/bin/grep "refint.la"
+  register: ldap_refint_overlay
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
 - name: Copy LDIF for referential integrity overlay
   copy: src=backend.refint.ldif
       dest='{{ slapd_dir }}/backend.refint.ldif'
+  when: '"olcModuleLoad:" not in ldap_refint_overlay.stdout'
 
 - name: Enable referential integrity overlay
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.refint.ldif
-      creates='{{ slapd_dir }}/slapd.d/cn=config/olcDatabase={2}{{ slapd_backend }}/olcOverlay={1}refint.ldif'
+  when: '"olcModuleLoad:" not in ldap_refint_overlay.stdout'
 
 - name: Test if remote access is already configured
   shell: '/usr/bin/grep "olcRootDN: cn=admin,cn=config" {{ slapd_dir }}/slapd.d/cn=config/olcDatabase={*}config.ldif'
