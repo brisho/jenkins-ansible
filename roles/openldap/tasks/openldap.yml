@@ -97,20 +97,20 @@
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.refint.ldif
   when: '"olcModuleLoad:" not in ldap_refint_overlay.stdout'
 
-- name: Test if remote access is already configured
-  shell: '/usr/bin/grep "olcRootDN: cn=admin,cn=config" {{ slapd_dir }}/slapd.d/cn=config/olcDatabase={*}config.ldif'
-  register: remote_access_enabled
+- name: Check if remote access is already configured
+  shell: '/usr/sbin/slapcat -n0 | /usr/bin/grep "olcRootDN: cn=admin,cn=config"'
+  register: ldap_remote_access
   failed_when: 1 == 0
   changed_when: 1 == 0
 
 - name: Copy LDIF for remote access
   template: src=backend.remote_access.ldif
       dest='{{ slapd_dir }}/backend.remote_access.ldif'
-  when: '"olcRootDN:" not in remote_access_enabled.stdout'
+  when: '"olcRootDN:" not in ldap_remote_access.stdout'
 
 - name: Enable remote access
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/backend.remote_access.ldif
-  when: '"olcRootDN:" not in remote_access_enabled.stdout'
+  when: '"olcRootDN:" not in ldap_remote_access.stdout'
 
 - name: Check if LDAP database is initialized
   shell: '/usr/bin/grep {{ slapd_basedn }} {{ slapd_dir }}/slapd.d/cn=config/olcDatabase={*}{{ slapd_backend }}.ldif'
