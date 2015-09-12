@@ -163,7 +163,7 @@
   when: '"uid: " not in ldapuser_present.stdout'
 
 - name: Copy new users LDIF
-  copy: src=new_users.ldif
+  template: src=new_users.ldif
       dest='{{ slapd_dir }}/new_users.ldif'
   when: '"uid: " not in ldapuser_present.stdout'
 
@@ -178,7 +178,7 @@
   changed_when: 1 == 0
 
 - name: Copy new groups LDIF
-  copy: src=new_groups.ldif
+  template: src=new_groups.ldif
       dest='{{ slapd_dir }}/new_groups.ldif'
   when: '"Everyone" not in ldapgroup_present.stdout'
 
