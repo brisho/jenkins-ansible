@@ -24,11 +24,18 @@
       enabled=yes
       state=started
 
+- name: Check if admin password is present
+  shell: /usr/sbin/slapcat -n0 | /usr/bin/grep olcRootPW:
+  register: ldap_admin_password_set
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
 - name: Generate admin password hash
   shell: 'echo -n "{{ slapd_admin_password }}" | /usr/sbin/slappasswd -h "{SSHA}" -T /dev/fd/0'
   register: ldap_passwd
   failed_when: 1 == 0
   changed_when: 1 == 0
+  when: '"olcRootPW:" not in ldap_admin_password_set.stdout'
 
 - name: Install core schema
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/core.ldif
