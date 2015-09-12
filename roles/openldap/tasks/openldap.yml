@@ -25,7 +25,7 @@
       state=started
 
 - name: Check if admin password is present
-  shell: /usr/sbin/slapcat -n0 | /usr/bin/grep olcRootPW:
+  shell: /usr/sbin/slapcat -n0 | /usr/bin/grep 'olcRootPW:'
   register: ldap_admin_password_set
   failed_when: 1 == 0
   changed_when: 1 == 0
