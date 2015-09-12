@@ -57,9 +57,15 @@
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/cosine.ldif
   when: '"cosine" not in ldap_cosine_schema.stdout'
 
+- name: Check if inetorgperson schema is installed
+  shell: /usr/sbin/slapcat -n0 | /usr/bin/grep "inetorgperson,cn=schema,cn=config"
+  register: ldap_inetorgperson_schema
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
 - name: Install inetorgperson schema
   command: /usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/schema/inetorgperson.ldif
-      creates='{{ slapd_dir }}/slapd.d/cn=config/cn=schema/cn={2}inetorgperson.ldif'
+  when: '"inetorgperson" not in ldap_inetorgperson_schema.stdout'
 
 - name: Copy LDIF for memberOf overlay
   copy: src=backend.memberof.ldif
