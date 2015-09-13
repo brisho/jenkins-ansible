@@ -224,3 +224,14 @@
   command: /usr/bin/ldapmodify -x -H ldapi:/// -D cn=admin,cn=config -w {{ slapd_admin_password }} -f {{ slapd_dir }}/ssl.modify.ldif
   when: '"OpenLDAP Server" in ldap_ssl_installed.stdout'
   notify: Restart slapd
+
+- name: Retrieve names of all .ldif files in /etc/openldap
+  shell: /usr/bin/ls -1 /etc/openldap/*.ldif
+  register: ldif_files
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
+- name: Ensure all .ldif files are removed from /etc/openldap
+  file: path={{ item }}
+      state=absent
+  with_items: ldif_files.stdout_lines
