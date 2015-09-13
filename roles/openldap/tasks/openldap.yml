@@ -235,3 +235,7 @@
   file: path={{ item }}
       state=absent
   with_items: ldif_files.stdout_lines
+
+- name: Copy LDAP client configuration file
+  template: src=ldap.conf
+      dest='{{ slapd_dir }}/ldap.conf'
