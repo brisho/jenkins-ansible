@@ -185,3 +185,42 @@
 - name: Add new groups
   shell: /usr/bin/ldapadd -x -H ldapi:/// -D cn=admin,{{ slapd_basedn }} -w {{ slapd_admin_password }} -f {{ slapd_dir }}/new_groups.ldif
   when: '"Everyone" not in ldapgroup_present.stdout'
+
+- name: Check if SSL certificates are installed
+  shell: '/usr/sbin/slapcat -n0 | /usr/bin/grep "olcTLSCertificateFile: " '
+  register: ldap_ssl_installed
+  failed_when: 1 == 0
+  changed_when: 1 == 0
+
+- name: Create /etc/openldap/certs directory
+  file: path=/etc/openldap/certs
+      state=directory
+      owner=ldap
+      group=ldap
+      mode=0700
+
+- name: Create self-signed SSL certificate for OpenLDAP
+  command: /usr/bin/openssl req -new -nodes -x509 -subj "/C={{ slapd_cert_country }}/ST={{ slapd_cert_state }}/L={{ slapd_cert_locality }}/O={{ slapd_cert_org }}/CN={{ ansible_nodename }}" -days {{ slapd_cert_days }} -keyout /etc/openldap/certs/server.key -out /etc/openldap/certs/server.crt -extensions v3_ca
+      creates=/etc/openldap/certs/server.crt
+
+- name: Set ownership & permissions on SSL key file
+  file: path=/etc/openldap/certs/server.key
+      owner=ldap
+      group=ldap
+      mode=0600
+
+- name: Set ownership & permissions on SSL certificate file
+  file: path=/etc/openldap/certs/server.crt
+      owner=ldap
+      group=ldap
+      mode=0644
+
+- name: Copy SSL configuration LDIF
+  copy: src=ssl.modify.ldif
+      dest='{{ slapd_dir }}/ssl.modify.ldif'
+  when: '"OpenLDAP Server" in ldap_ssl_installed.stdout'
+
+- name: Set SSL certificate files
+  command: /usr/bin/ldapmodify -x -H ldapi:/// -D cn=admin,cn=config -w {{ slapd_admin_password }} -f {{ slapd_dir }}/ssl.modify.ldif
+  when: '"OpenLDAP Server" in ldap_ssl_installed.stdout'
+  notify: Restart slapd
