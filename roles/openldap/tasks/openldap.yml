@@ -225,6 +225,10 @@
   when: '"OpenLDAP Server" in ldap_ssl_installed.stdout'
   notify: Restart slapd
 
+- name: Put self-signed cert in Java cacerts file so it's trusted
+  command: /usr/bin/keytool -import -noprompt -storepass changeit -trustcacerts -alias {{ slapd_domain }}-local-cert -keystore {{ cacerts }} -file {{ slapd_dir }}/certs/server.crt
+  when: '"OpenLDAP Server" in ldap_ssl_installed.stdout'
+
 - name: Retrieve names of all working *.ldif files
   shell: /usr/bin/ls -1 {{ slapd_dir }}/*.ldif
   register: ldif_files
