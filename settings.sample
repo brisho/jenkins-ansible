@@ -12,3 +12,5 @@ slapd_cert_state: 'MyState'
 slapd_cert_locality: 'MyCity'
 slapd_cert_org: 'MyOrg'
 slapd_cert_days: '3650'
+
+cacerts: '/etc/pki/java/cacerts'
