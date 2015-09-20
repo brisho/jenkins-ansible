@@ -46,6 +46,15 @@
   command: /usr/bin/ldapmodify -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/db.modify.ldif
   when: '"olcRootPW:" not in ldap_admin_password_set.stdout'
 
+- name: Copy LDIF for turning off anonymous bind
+  template: src=anon_bind.modify.ldif
+      dest='{{ slapd_dir }}/anon_bind.modify.ldif'
+  when: '"olcRootPW:" not in ldap_admin_password_set.stdout'
+
+- name: Turn off anonymous bind
+  command: /usr/bin/ldapmodify -Y EXTERNAL -H ldapi:/// -f {{ slapd_dir }}/anon_bind.modify.ldif
+  when: '"olcRootPW:" not in ldap_admin_password_set.stdout'
+
 - name: Check if core schema is installed
   shell: /usr/sbin/slapcat -n0 | /usr/bin/grep "core,cn=schema,cn=config"
   register: ldap_core_schema
