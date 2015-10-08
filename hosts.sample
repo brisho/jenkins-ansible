@@ -1,2 +1,9 @@
-default ansible_ssh_host=192.168.10.20
+host1 ansible_ssh_host=192.168.10.20
+host2 ansible_ssh_host=192.168.10.30
+
+[openldap]
+host1
+
+[jenkins]
+host1
 

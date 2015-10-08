@@ -1,6 +1,6 @@
 ---
 
-- hosts: default
+- hosts: all
 
   gather_facts: True
 
@@ -8,4 +8,4 @@
     - settings.yml
 
   roles:
-    - { role: openldap, tags: ['openldap'] }
+    - { role: openldap, tags: ['openldap'], when: inventory_hostname in groups.openldap }
